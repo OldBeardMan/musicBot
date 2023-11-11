@@ -42,4 +42,4 @@ async def stop_music(ctx):
     await discord.VoiceClient.disconnect(ctx.voice_client)
 
 # Uruchom bota
-bot.run('NzY3Mzc4MDc2NjM5NTU5Njgw.G-HOFc.AzX3ZrTYO0QSTE1ggl60L7aWdcmmFLHf6RC08k')
+bot.run('token')
