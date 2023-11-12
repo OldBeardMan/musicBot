@@ -3,11 +3,14 @@ from discord.ext import commands, tasks
 import asyncio
 import os
 import forPlaylist
+import random
 
 intents = discord.Intents.all()
 bot = commands.Bot(command_prefix='>', intents=intents)
 
 playlist = forPlaylist.create('music')
+
+cat_images_folder = 'cat_images'
 
 @bot.event
 async def on_ready():
@@ -56,5 +59,24 @@ async def background_music():
     # Odtwarzaj muzykę
     await play_music()
 
+@bot.command(name='sprytek')
+async def sprytek(ctx):
+    cat_image = get_random_cat_image()
+    
+    if cat_image:
+        with open(cat_image, 'rb') as file:
+            await ctx.send(file=discord.File(file))
+    else:
+        await ctx.send("Nie znaleziono żadnych zdjęć kota.")
+
+def get_random_cat_image():
+    cat_images = [file for file in os.listdir(cat_images_folder) if file.endswith(('.png', '.jpg', '.jpeg'))]
+
+    if cat_images:
+        random_cat_image = random.choice(cat_images)
+        return os.path.join(cat_images_folder, random_cat_image)
+    else:
+        return None
+
 # Uruchom bota
-bot.run('dont')
+bot.run('')
