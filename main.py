@@ -57,4 +57,4 @@ async def background_music():
     await play_music()
 
 # Uruchom bota
-bot.run('NzY3Mzc4MDc2NjM5NTU5Njgw.GE-QRs.xwnTIqdQa37RGZ3m9qoRJe4SOrQaYgKCSBjFDY')
+bot.run('dont')
