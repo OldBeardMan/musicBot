@@ -59,6 +59,10 @@ async def background_music():
     # Odtwarzaj muzykę
     await play_music()
 
+@bot.command(name='reality')
+async def reality(ctx):
+    await ctx.send("Can you really enjoy reality anymore?")
+
 @bot.command(name='sprytek')
 async def sprytek(ctx):
     cat_image = get_random_cat_image()
