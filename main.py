@@ -48,6 +48,20 @@ async def play_music():
             await asyncio.sleep(1)
             playlist.append(file_path)
 
+async def on_message(message):
+    if message.author == bot.user:
+        return
+
+    if "matt" in message.content.lower():
+        await message.channel.send('If you want to know more about Matt check out: https://mattkrupa.net/')
+
+    if "kuna" in message.content.lower():
+        await message.channel.send('Kuna')
+
+    if "sprytek" in message.content.lower():
+        await message.channel.send('to ja!')
+        await message.author.send('miauuuu')
+        
 @tasks.loop(seconds=5)
 async def background_music():
     # Sprawdź, czy bot jest w kanałach głosowych
