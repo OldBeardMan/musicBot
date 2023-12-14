@@ -4,6 +4,7 @@ import asyncio
 import os
 import forPlaylist
 import random
+import responses
 
 intents = discord.Intents.all()
 bot = commands.Bot(command_prefix='>', intents=intents)
@@ -11,6 +12,25 @@ bot = commands.Bot(command_prefix='>', intents=intents)
 playlist = forPlaylist.create('music')
 
 cat_images_folder = 'cat_images'
+
+async def send_message(message, user_message, is_private):
+    try:
+        response = responses.handle_response(user_message)
+        if is_private:
+            await message.author.send(response)
+        else:
+            await message.channel.send(response)
+    except Exception as e:
+        print(e)
+
+def get_random_cat_image():
+    cat_images = [file for file in os.listdir(cat_images_folder) if file.endswith(('.png', '.jpg', '.jpeg'))]
+
+    if cat_images:
+        random_cat_image = random.choice(cat_images)
+        return os.path.join(cat_images_folder, random_cat_image)
+    else:
+        return None
 
 @bot.event
 async def on_ready():
@@ -48,19 +68,16 @@ async def play_music():
             await asyncio.sleep(1)
             playlist.append(file_path)
 
+@bot.event
 async def on_message(message):
     if message.author == bot.user:
         return
+    username = str(message.author)
+    user_message = str(message.content)
+    channel = str(message.channel)
 
-    if "matt" in message.content.lower():
-        await message.channel.send('If you want to know more about Matt check out: https://mattkrupa.net/')
+    await send_message(message, user_message, is_Private=False)
 
-    if "kuna" in message.content.lower():
-        await message.channel.send('Kuna')
-
-    if "sprytek" in message.content.lower():
-        await message.channel.send('to ja!')
-        await message.author.send('miauuuu')
         
 @tasks.loop(seconds=5)
 async def background_music():
@@ -86,15 +103,6 @@ async def sprytek(ctx):
             await ctx.send(file=discord.File(file))
     else:
         await ctx.send("Nie znaleziono żadnych zdjęć kota.")
-
-def get_random_cat_image():
-    cat_images = [file for file in os.listdir(cat_images_folder) if file.endswith(('.png', '.jpg', '.jpeg'))]
-
-    if cat_images:
-        random_cat_image = random.choice(cat_images)
-        return os.path.join(cat_images_folder, random_cat_image)
-    else:
-        return None
 
 # Uruchom bota
 bot.run('')
