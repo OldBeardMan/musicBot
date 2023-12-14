@@ -4,7 +4,6 @@ import asyncio
 import os
 import forPlaylist
 import random
-import responses
 
 intents = discord.Intents.all()
 bot = commands.Bot(command_prefix='>', intents=intents)
@@ -13,15 +12,6 @@ playlist = forPlaylist.create('music')
 
 cat_images_folder = 'cat_images'
 
-async def send_message(message, user_message, is_private):
-    try:
-        response = responses.handle_response(user_message)
-        if is_private:
-            await message.author.send(response)
-        else:
-            await message.channel.send(response)
-    except Exception as e:
-        print(e)
 
 def get_random_cat_image():
     cat_images = [file for file in os.listdir(cat_images_folder) if file.endswith(('.png', '.jpg', '.jpeg'))]
@@ -70,13 +60,21 @@ async def play_music():
 
 @bot.event
 async def on_message(message):
+    await bot.process_commands(message)
     if message.author == bot.user:
         return
-    username = str(message.author)
-    user_message = str(message.content)
-    channel = str(message.channel)
+    
+    keyword_responses = {
+        "kuna": "kuna",
+        "matt": "If you want to know more about Matt check out: https://mattkrupa.net/",
+        "sprytek": "It's me!"
+    }
 
-    await send_message(message, user_message, is_Private=False)
+    for keyword, response in keyword_responses.items():
+        if keyword in message.content:
+            await message.channel.send(response)
+            break
+
 
         
 @tasks.loop(seconds=5)
