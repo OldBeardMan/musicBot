@@ -4,6 +4,7 @@ import asyncio
 import os
 import forPlaylist
 import random
+from pointSystem import pointSystem
 
 intents = discord.Intents.all()
 bot = commands.Bot(command_prefix='>', intents=intents)
@@ -12,6 +13,7 @@ playlist = forPlaylist.create('music')
 
 cat_images_folder = 'cat_images'
 
+point_system = pointSystem()
 
 def get_random_cat_image():
     cat_images = [file for file in os.listdir(cat_images_folder) if file.endswith(('.png', '.jpg', '.jpeg'))]
@@ -101,6 +103,30 @@ async def sprytek(ctx):
             await ctx.send(file=discord.File(file))
     else:
         await ctx.send("Nie znaleziono żadnych zdjęć kota.")
+
+@bot.command(name='quiz')
+async def quiz(ctx):
+    author = ctx.author
+    user_id = author.id
+    point_system.add_user(user_id)
+
+    await ctx.send("W którym roku się urodziłem?")
+
+    def check_answer(message):
+        return message.author == author and message.channel == ctx.channel
+
+    try:
+        answer_message = await bot.wait_for('message', check=check_answer, timeout=10) 
+
+        if answer_message.content == "2012": 
+            point_system.add_points(user_id, 1)
+            await ctx.send("Poprawna odpowiedź! Zdobywasz 1 punkt.")
+            await ctx.send(f"Masz aktualnie na koncie: {point_system.get_points(user_id)}")
+        else:
+            await ctx.send("Niestety, to nie jest poprawna odpowiedź.")
+
+    except asyncio.TimeoutError:
+        await ctx.send("Czas na odpowiedź minął.")
 
 # Uruchom bota
 bot.run('')
