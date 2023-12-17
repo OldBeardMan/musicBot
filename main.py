@@ -106,11 +106,32 @@ async def sprytek(ctx):
 
 @bot.command(name='quiz')
 async def quiz(ctx):
+
+    channel = ctx.channel
+    channel_id = channel.id
+
+    if channel_id != '1186017543924744192':
+        await ctx.send("Piszesz na złym kanale! Przejdź na kanał 'quiz', aby nie spamić innym!")
+        return
+    
     author = ctx.author
     user_id = author.id
     point_system.add_user(user_id)
 
-    await ctx.send("W którym roku się urodziłem?")
+    question_id = random(0,1)
+
+    if question_id == 0:
+        question = "W którym roku się urodziłem?"
+        answer = "2012"
+    elif question_id == 1:
+        question = "W którym roku Matt wydał swój pierwszy album?"
+        answer = "2020"
+    elif question_id == 2:
+        question = "Kto założył instagrama Matt'a?"
+        answer = "wool"
+
+
+    await ctx.send(question)
 
     def check_answer(message):
         return message.author == author and message.channel == ctx.channel
@@ -118,7 +139,7 @@ async def quiz(ctx):
     try:
         answer_message = await bot.wait_for('message', check=check_answer, timeout=10) 
 
-        if answer_message.content == "2012": 
+        if answer_message.content == answer: 
             point_system.add_points(user_id, 1)
             await ctx.send("Poprawna odpowiedź! Zdobywasz 1 punkt.")
             await ctx.send(f"Masz aktualnie na koncie: {point_system.get_points(user_id)}")
