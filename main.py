@@ -24,6 +24,9 @@ def get_random_cat_image():
     else:
         return None
 
+
+
+#RADIO
 @bot.event
 async def on_ready():
     print(f'Logged in as {bot.user.name}')
@@ -43,23 +46,31 @@ async def play_music():
 
             print(f"Attempting to play: {file_path}")
 
-            # Odtwarzaj utwór
             voice_channel.play(discord.FFmpegPCMAudio(file_path), after=lambda e: print('done', e))
 
-            # Poczekaj do zakończenia odtwarzania aktualnego utworu
             while voice_channel.is_playing():
                 await asyncio.sleep(1)
 
-            # Po zakończeniu utworu, dodaj go z powrotem do playlisty
             playlist.append(file_path)
 
-            # Odczekaj chwilę przed sprawdzeniem następnego utworu
             await asyncio.sleep(5)
         else:
             print(f"File not found: {file_path}")
             await asyncio.sleep(1)
             playlist.append(file_path)
 
+@tasks.loop(seconds=5)
+async def background_music():
+    if not bot.voice_clients:
+        print("Bot is not in a voice channel.")
+        return
+
+    print("Checking for music...")
+    await play_music()
+
+
+
+#CHATBOT
 @bot.event
 async def on_message(message):
     await bot.process_commands(message)
@@ -78,18 +89,7 @@ async def on_message(message):
             break
 
 
-        
-@tasks.loop(seconds=5)
-async def background_music():
-    # Sprawdź, czy bot jest w kanałach głosowych
-    if not bot.voice_clients:
-        print("Bot is not in a voice channel.")
-        return
-
-    print("Checking for music...")
-    # Odtwarzaj muzykę
-    await play_music()
-
+#SHITPOSTKOMENDY
 @bot.command(name='reality')
 async def reality(ctx):
     await ctx.send("Can you really enjoy reality anymore?")
@@ -104,6 +104,9 @@ async def sprytek(ctx):
     else:
         await ctx.send("Nie znaleziono żadnych zdjęć kota.")
 
+
+
+#MINIGIERKI
 @bot.command(name='quiz')
 async def quiz(ctx):
 
@@ -118,7 +121,7 @@ async def quiz(ctx):
     user_id = author.id
     point_system.add_user(user_id)
 
-    question_id = random(0,1)
+    question_id = random(0,13)
 
     if question_id == 0:
         question = "W którym roku się urodziłem?"
@@ -129,6 +132,39 @@ async def quiz(ctx):
     elif question_id == 2:
         question = "Kto założył instagrama Matt'a?"
         answer = "wool"
+    elif question_id == 3:
+        question = "Pierwszy utwór skomponowany przez Matt'a to?"
+        answer = "printer"
+    elif question_id == 4:
+        question = "Jaki zespół Matt scoverował jako pierwszy?"
+        answer = "Korn"
+    elif question_id == 5:
+        question = "W którym roku powstał Discord Matt Enjoyers?"
+        answer = "2021"
+    elif question_id == 6:
+        question = "Jak się nazywa serwer w Minecrafcie Matt'a?"
+        answer = "Long Kitten Nation"
+    elif question_id == 7:
+        question = "Jaki instrument Matt wybrał na swój pierwszy?"
+        answer = "bass"
+    elif question_id == 8:
+        question = "Podaj nazwę clickera jaki Matt zrobił w 2016 roku:"
+        answer = "Banana Mine"
+    elif question_id == 9:
+        question = "Z jakiego słowa wywodzi się słowo 'kuna'?"
+        answer = "kurna"
+    elif question_id == 10:
+        question = "Nazwa zespołu rockowego Matta:"
+        answer = "Blooming Cactus"
+    elif question_id == 11:
+        question = "Na kim wzorował się Matt najbardziej komponując swoją muzykę?"
+        answer = "C418"
+    elif question_id == 12:
+        question = "Jak pierwotnie nazywał się album Winter?"
+        answer = "Presents"
+    elif question_id == 13:
+        question = "Jak się nazywa pies występujący w listening videos do albumu Iceland?"
+        answer = "Płotka"
 
 
     await ctx.send(question)
@@ -139,7 +175,7 @@ async def quiz(ctx):
     try:
         answer_message = await bot.wait_for('message', check=check_answer, timeout=10) 
 
-        if answer_message.content == answer: 
+        if answer_message.content.lower == answer.lower: 
             point_system.add_points(user_id, 1)
             await ctx.send("Poprawna odpowiedź! Zdobywasz 1 punkt.")
             await ctx.send(f"Masz aktualnie na koncie: {point_system.get_points(user_id)}")
