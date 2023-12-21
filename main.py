@@ -165,6 +165,9 @@ async def quiz(ctx):
     elif question_id == 13:
         question = "Jak się nazywa pies występujący w listening videos do albumu Iceland?"
         answer = "Płotka"
+    elif question_id == 14:
+        question = "How are you?"
+        answer = "Yes"
 
 
     await ctx.send(question)
