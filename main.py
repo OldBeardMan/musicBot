@@ -168,6 +168,9 @@ async def quiz(ctx):
     elif question_id == 14:
         question = "How are you?"
         answer = "Yes"
+    elif question_id == 15:
+        question = "When was In The Autumng Forest released?"
+        answer = "28.11.2020"
 
 
     await ctx.send(question)
