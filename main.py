@@ -121,7 +121,7 @@ async def quiz(ctx):
     user_id = author.id
     point_system.add_user(user_id)
 
-    question_id = random(0,13)
+    question_id = random(0,20)
 
     if question_id == 0:
         question = "W którym roku się urodziłem?"
@@ -169,11 +169,23 @@ async def quiz(ctx):
         question = "How are you?"
         answer = "Yes"
     elif question_id == 15:
-        question = "When was In The Autumng Forest released?"
+        question = "Kiedy zostało wydane In The Autumn Forest? (data)"
         answer = "28.11.2020"
     elif question_id == 16:
-        question = "When did Matt start playing bass?"
-        answer = "in 2016"
+        question = "Kiedy Matt zaczął grać na basie? (rok)"
+        answer = "2016"
+    elif question_id == 17:
+        question = "Kiedy Blooming Cactus został założony? (rok)"
+        answer = "2021"
+    elif question_id == 18:
+        question = "Jak nazywa się dodatkowy utwór pierwszego singla Nordic Countries?"
+        answer = "The Pope's Hout Has Struck"
+    elif question_id == 19:
+        question = "Kto jest największym fanem Matt'a Krupy? (imię)"
+        answer = "Natt"
+    elif question_id == 20:
+        question = "Kto dał Matt'owi pomysł zrobienia albumu? (imię)"
+        answer = "Paweł"
 
 
     await ctx.send(question)
