@@ -12,11 +12,11 @@ class pointSystem:
             self.users[user_id] = User(user_id)
 
     def add_points(self, user_id, points):
+        pointSystem.add_user(user_id)
         if user_id in self.users:
             self.users[user_id].points += points
 
     def get_points(self, user_id):
+        pointSystem.add_user(user_id)
         if user_id in self.users:
             return self.users[user_id].points
-        else:
-            return 0

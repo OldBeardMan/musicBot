@@ -70,13 +70,15 @@ async def background_music():
 
 
 
-#CHATBOT
+#CHATBOT AND LEVELING UP
 @bot.event
 async def on_message(message):
     await bot.process_commands(message)
     if message.author == bot.user:
         return
-    
+
+    point_system.add_points(message.author,1)
+
     keyword_responses = {
         "kuna": "kuna",
         "matt": "If you want to know more about Matt check out: https://mattkrupa.net/",
@@ -87,6 +89,45 @@ async def on_message(message):
         if keyword in message.content:
             await message.channel.send(response)
             break
+    
+    lvl1 = discord.utils.get(message.guild.roles, id="1179386986730111047")
+    lvl2 = discord.utils.get(message.guild.roles, id="1189969679716986960")
+    lvl3 = discord.utils.get(message.guild.roles, id="1189969990594609172")
+    lvl4 = discord.utils.get(message.guild.roles, id="1189970279808639026")
+    lvl5 = discord.utils.get(message.guild.roles, id="1189970499858608209")
+    lvl6 = discord.utils.get(message.guild.roles, id="1189970897558315068")
+    lvl7 = discord.utils.get(message.guild.roles, id="1189971280242426006")
+
+    if point_system.get_points(message.author) == 10:
+        message.author.add_roles(lvl1)
+        await message.channel.send(f"{message.author} have achived level 1 role: printer!")
+    elif point_system.get_points(message.author) == 100:
+        message.author.add_roles(lvl2)
+        await message.channel.send(f"{message.author} have achived level 2 role: Autumn Wanderer!")
+    elif point_system.get_points(message.author) == 500:
+        message.author.add_roles(lvl3)
+        await message.channel.send(f"{message.author} have achived level 3 role: Do-Not-Listener!")
+    elif point_system.get_points(message.author) == 2500:
+        message.author.add_roles(lvl4)
+        await message.channel.send(f"{message.author} have achived level 4 role: Winter Gifter!")
+    elif point_system.get_points(message.author) == 10000:
+        message.author.add_roles(lvl5)
+        await message.channel.send(f"{message.author} have achived level 5 role: Nordic Mountaineer!")
+    elif point_system.get_points(message.author) == 100000:
+        message.author.add_roles(lvl6)
+        await message.channel.send(f"{message.author} have achived level 6 role: Icelandic Fugitive!")
+    elif point_system.get_points(message.author) == 1000000:
+        message.author.add_roles(lvl7)
+        await message.channel.send(f"{message.author} have achived the hightest level role: The Matt Devotee!")
+        await message.channel.send(f"{message.author} just sent theirs millionth message!!! MAD")
+    
+
+@bot.command(name='points')
+async def points(ctx):
+    await ctx.send(f"User {ctx.author} has {point_system.get_points(ctx.author)} points!")
+
+
+
 
 
 #SHITPOSTKOMENDY
