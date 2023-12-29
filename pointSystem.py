@@ -10,19 +10,19 @@ class PointSystem:
         self.file_path = file_path
         self.users = self.load_users_data()
 
+    def save_users_data(self):
+        current_data = {user_id: self.users[user_id].points for user_id in self.users}
+        with open(self.file_path, 'w') as file:
+            json.dump(current_data, file, indent=4)
+
     def load_users_data(self):
         try:
             with open(self.file_path, 'r') as file:
                 data = json.load(file)
-                users = {user_id: User(user_id, data[user_id]['points']) for user_id in data}
+                users = {user_id: User(user_id, points) for user_id, points in data.items()}
                 return users
         except FileNotFoundError:
             return {}
-
-    def save_users_data(self):
-        data = {user_id: {'points': self.users[user_id].points} for user_id in self.users}
-        with open(self.file_path, 'w') as file:
-            json.dump(data, file, indent=4)
 
     def add_user(self, user_id):
         if user_id not in self.users:

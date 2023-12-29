@@ -111,25 +111,25 @@ async def on_message(message):
     lvl6 = discord.utils.get(message.guild.roles, id="1189970897558315068")
     lvl7 = discord.utils.get(message.guild.roles, id="1189971280242426006")
 
-    if point_system.get_points(message.author) == 10:
+    if point_system.get_points(str(message.author.id)) == 10:
         message.author.add_roles(lvl1)
         await message.channel.send(f"{message.author} have achived level 1 role: printer!")
-    elif point_system.get_points(message.author) == 100:
+    elif point_system.get_points(str(message.author.id)) == 100:
         message.author.add_roles(lvl2)
         await message.channel.send(f"{message.author} have achived level 2 role: Autumn Wanderer!")
-    elif point_system.get_points(message.author) == 500:
+    elif point_system.get_points(str(message.author.id)) == 500:
         message.author.add_roles(lvl3)
         await message.channel.send(f"{message.author} have achived level 3 role: Do-Not-Listener!")
-    elif point_system.get_points(message.author) == 2500:
+    elif point_system.get_points(str(message.author.id)) == 2500:
         message.author.add_roles(lvl4)
         await message.channel.send(f"{message.author} have achived level 4 role: Winter Gifter!")
-    elif point_system.get_points(message.author) == 10000:
+    elif point_system.get_points(str(message.author.id)) == 10000:
         message.author.add_roles(lvl5)
         await message.channel.send(f"{message.author} have achived level 5 role: Nordic Mountaineer!")
-    elif point_system.get_points(message.author) == 100000:
+    elif point_system.get_points(str(message.author.id)) == 100000:
         message.author.add_roles(lvl6)
         await message.channel.send(f"{message.author} have achived level 6 role: Icelandic Fugitive!")
-    elif point_system.get_points(message.author) == 1000000:
+    elif point_system.get_points(str(message.author.id)) == 1000000:
         message.author.add_roles(lvl7)
         await message.channel.send(f"{message.author} have achived the hightest level role: The Matt Devotee!")
         await message.channel.send(f"{message.author} just sent theirs millionth message!!! MAD")
