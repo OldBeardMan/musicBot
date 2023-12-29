@@ -4,7 +4,7 @@ import asyncio
 import os
 import forPlaylist
 import random
-from pointSystem import pointSystem
+from pointSystem import PointSystem
 
 intents = discord.Intents.all()
 bot = commands.Bot(command_prefix='>', intents=intents)
@@ -15,7 +15,7 @@ cat_images_folder = 'cat_images'
 
 last_message_times = {}
 
-point_system = pointSystem()
+point_system = PointSystem()
 
 def get_random_cat_image():
     cat_images = [file for file in os.listdir(cat_images_folder) if file.endswith(('.png', '.jpg', '.jpeg'))]
