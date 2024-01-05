@@ -77,9 +77,9 @@ async def background_music():
 async def on_message(message):
     current_time = message.created_at.timestamp()
 
-    await bot.process_commands(message)
-    if message.author == bot.user or message.authot.id == '1047630442930634793':
-        return
+    member = message.guild.get_member(message.author.id)  
+    if member is not None and any(role.id == "1165958650158907432" for role in member.roles):
+        return 
 
     if message.author.id in last_message_times:
         time_difference = current_time - last_message_times[message.author.id]
@@ -138,7 +138,6 @@ async def on_message(message):
 @bot.command(name='points')
 async def points(ctx):
     await ctx.send(f"User {ctx.author.mention} has {point_system.get_points(str(ctx.author.id))} points!")
-
 
 
 
