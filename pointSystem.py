@@ -35,6 +35,12 @@ class PointSystem:
             self.users[user_id].points += points
             self.save_users_data()
 
+    def sub_points(self, user_id, points):
+        self.add_user(user_id)
+        if user_id in self.users:
+            self.users[user_id].points -= points
+            self.save_users_data()
+
     def get_points(self, user_id):
         self.add_user(user_id)
         if user_id in self.users:
