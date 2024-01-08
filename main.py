@@ -100,7 +100,7 @@ async def on_message(message):
     }
 
     for keyword, response in keyword_responses.items():
-        if keyword in message.content:
+        if keyword.lower() in message.content.lower():
             await message.channel.send(response)
             break
     
