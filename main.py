@@ -96,7 +96,8 @@ async def on_message(message):
     keyword_responses = {
         "kuna": "kuna",
         "matt": "If you want to know more about Matt check out: https://mattkrupa.net/",
-        "sprytek": "It's me!"
+        "sprytek": "It's me!",
+        "sus": "amogus"
     }
 
     for keyword, response in keyword_responses.items():
@@ -148,7 +149,7 @@ async def add(ctx, p: int):
         point_system.add_points(str(ctx.author.id), p)
         await ctx.send(f"Added {p} points!")
     else:
-        await ctx.send("You do not have permissions to use this command!")
+        await ctx.send("NIE DLA PSA!")
 
 @bot.command(name='sub')
 async def sub(ctx, p: int):
