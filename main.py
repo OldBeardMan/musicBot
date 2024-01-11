@@ -75,12 +75,22 @@ async def background_music():
 #CHATBOT AND LEVELING UP
 @bot.event
 async def on_message(message):
+    meme = False
     await bot.process_commands(message)
+    channel = message.channel
     current_time = message.created_at.timestamp()
 
     role = discord.utils.find(lambda r: r.name == 'Bots', message.guild.roles) 
     if role in message.author.roles:
         return
+
+    if message.attachments:
+        for attachment in message.attachments:
+            allowed_extensions = {'png', 'jpg', 'jpeg', 'gif'}
+            file_extension = attachment.filename.split('.')[-1].lower()
+
+            if file_extension in allowed_extensions:
+                meme = True
 
     if message.author.id in last_message_times:
         time_difference = current_time - last_message_times[message.author.id]
@@ -91,7 +101,10 @@ async def on_message(message):
 
     last_message_times[message.author.id] = current_time
 
-    point_system.add_points(str(message.author.id), 1)
+    if channel.id == '1042307972224786455' and meme:
+        point_system.add_points(str(message.author.id), 5)
+    else:
+        point_system.add_points(str(message.author.id), 1)
 
     keyword_responses = {
         "kuna": "kuna",
