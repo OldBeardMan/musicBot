@@ -80,31 +80,28 @@ async def on_message(message):
     channel = message.channel
     current_time = message.created_at.timestamp()
 
-    role = discord.utils.find(lambda r: r.name == 'Bots', message.guild.roles) 
+    role = discord.utils.find(lambda r: r.name == 'Bots', message.guild.roles)
     if role in message.author.roles:
         return
 
-    if message.attachments:
-        for attachment in message.attachments:
-            allowed_extensions = {'png', 'jpg', 'jpeg', 'gif'}
-            file_extension = attachment.filename.split('.')[-1].lower()
-
-            if file_extension in allowed_extensions:
-                meme = True
+    image_extensions = {'png', 'jpg', 'jpeg', 'gif'}
+    if any(attachment.filename.lower().endswith(tuple(image_extensions)) for attachment in message.attachments):
+        meme = True
 
     if message.author.id in last_message_times:
         time_difference = current_time - last_message_times[message.author.id]
-        
+
         if time_difference < 1:
             await message.channel.send(f"{message.author.mention}, DO NOT SPAM!")
             return
 
     last_message_times[message.author.id] = current_time
 
-    if channel.id == '1042307972224786455' and meme:
+    if channel.name == 'memes' and meme:
         point_system.add_points(str(message.author.id), 5)
     else:
         point_system.add_points(str(message.author.id), 1)
+
 
     keyword_responses = {
         "kuna": "kuna",
