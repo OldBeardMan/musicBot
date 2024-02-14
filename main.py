@@ -154,22 +154,23 @@ async def points(ctx):
 
 
 @bot.command(name='add')
-async def add(ctx, p: int):
+async def add(ctx, member: discord.Member, p: int):
     role = discord.utils.find(lambda r: r.name == 'Matt', ctx.guild.roles) 
     if role in ctx.author.roles:
-        point_system.add_points(str(ctx.author.id), p)
-        await ctx.send(f"Added {p} points!")
+        point_system.add_points(str(member.id), p)
+        await ctx.send(f"Added {p} points to {member.display_name}!")
     else:
         await ctx.send("NIE DLA PSA!")
 
 @bot.command(name='sub')
-async def sub(ctx, p: int):
+async def sub(ctx, member: discord.Member, p: int):
     role = discord.utils.find(lambda r: r.name == 'Matt', ctx.guild.roles) 
     if role in ctx.author.roles:
-        point_system.sub_points(str(ctx.author.id), p)
-        await ctx.send(f"Substracted {p} points!")
+        point_system.sub_points(str(member.id), p)
+        await ctx.send(f"Subtracted {p} points from {member.display_name}!")
     else:
         await ctx.send("You do not have permissions to use this command!")
+
 
 #SHITPOSTKOMENDY
 @bot.command(name='reality')
