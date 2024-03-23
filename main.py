@@ -1,13 +1,12 @@
 import discord
-from discord.ext import commands, tasks
+from discord.ext import tasks
+from discord import app_commands
 import asyncio
 import os
 import forPlaylist
 import random
-from pointSystem import PointSystem
+from pointSystem import PointSystem       
 
-intents = discord.Intents.all()
-bot = commands.Bot(command_prefix='>', intents=intents)
 
 playlist = forPlaylist.create('music')
 
@@ -26,25 +25,34 @@ def get_random_cat_image():
     else:
         return None
 
+class aclient(discord.Client):
+    def __init__(self):
+        super().__init__(intents=discord.Intents.all())
+        self.synced = False
 
+    async def on_ready(self):
+        await self.wait_until_ready()
+        if not self.synced:
+            await tree.sync()
+            self.synced = True
+        print(f'Logged in as {self.user}')
+        await self.change_presence(activity=discord.Game(name='Matt Krupa'))
+        channel_id = 1173158666174742538
+        channel = self.get_channel(channel_id)
+        await channel.connect()
+        print("Bot is ready.")
+        background_music.start()
+        
+client = aclient()
+tree = app_commands.CommandTree(client) 
 
-#RADIO
-@bot.event
-async def on_ready():
-    print(f'Logged in as {bot.user.name}')
-    await bot.change_presence(activity=discord.Game(name='Matt Krupa'))
-    channel_id = 1173158666174742538
-    channel = bot.get_channel(channel_id)
-    await channel.connect()
-    print("Bot is ready.")
-    background_music.start()
 
 async def play_music():
     while playlist:
         file_path = playlist.pop(0)
         if os.path.isfile(file_path):
-            channel = bot.voice_clients[0].channel
-            voice_channel = discord.utils.get(bot.voice_clients, guild=channel.guild)
+            channel = client.voice_clients[0].channel
+            voice_channel = discord.utils.get(client.voice_clients, guild=channel.guild)
 
             print(f"Attempting to play: {file_path}")
 
@@ -63,7 +71,7 @@ async def play_music():
 
 @tasks.loop(seconds=5)
 async def background_music():
-    if not bot.voice_clients:
+    if not client.voice_clients:
         print("Bot is not in a voice channel.")
         return
 
@@ -73,11 +81,10 @@ async def background_music():
 
 
 #CHATBOT AND LEVELING UP
-@bot.event
+@client.event
 async def on_message(message):
     input_points = point_system.get_points(str(message.author.id))
     meme = False
-    await bot.process_commands(message)
     channel = message.channel
     current_time = message.created_at.timestamp()
 
@@ -93,7 +100,7 @@ async def on_message(message):
         time_difference = current_time - last_message_times[message.author.id]
 
         if time_difference < 1:
-            await message.channel.send(f"{message.author.mention}, DO NOT SPAM!")
+            await message.respond(f"{message.author.mention}, DO NOT SPAM!")
             return
 
     last_message_times[message.author.id] = current_time
@@ -113,7 +120,7 @@ async def on_message(message):
 
     for keyword, response in keyword_responses.items():
         if keyword.lower() in message.content.lower():
-            await message.channel.send(response)
+            await message.respond(response)
             break
     
     lvl1 = discord.utils.get(message.guild.roles, name="printer")
@@ -146,50 +153,64 @@ async def on_message(message):
         await message.author.add_roles(lvl7)
         await message.channel.send(f"{message.author.mention} have achived the hightest level role: The Matt Devotee!")
         await message.channel.send(f"{message.author.mention} just sent theirs millionth message!!! MAD")
-    
 
-@bot.command(name='points')
+
+@tree.command(
+    name="points",
+    description="Shows you how many points you have!",
+)
 async def points(ctx):
-    await ctx.send(f"User {ctx.author.mention} has {point_system.get_points(str(ctx.author.id))} points!")
+    await ctx.respond(f"User {ctx.author.mention} has {point_system.get_points(str(ctx.author.id))} points!")
 
 
-@bot.command(name='add')
+@tree.command(
+    name="add",
+    description="Adding points, accesible only by the admins!",
+)
 async def add(ctx, member: discord.Member, p: int):
     role = discord.utils.find(lambda r: r.name == 'Matt', ctx.guild.roles) 
     if role in ctx.author.roles:
         point_system.add_points(str(member.id), p)
-        await ctx.send(f"Added {p} points to {member.display_name}!")
+        await ctx.respond(f"Added {p} points to {member.display_name}!")
     else:
-        await ctx.send("NIE DLA PSA!")
+        await ctx.respond("NIE DLA PSA!")
 
-@bot.command(name='sub')
+@tree.command(
+    name="sub",
+    description="Substract points.",
+)
 async def sub(ctx, member: discord.Member, p: int):
     role = discord.utils.find(lambda r: r.name == 'Matt', ctx.guild.roles) 
     if role in ctx.author.roles:
         point_system.sub_points(str(member.id), p)
-        await ctx.send(f"Subtracted {p} points from {member.display_name}!")
+        await ctx.respond(f"Subtracted {p} points from {member.display_name}!")
     else:
-        await ctx.send("You do not have permissions to use this command!")
+        await ctx.respond("You do not have permissions to use this command!")
 
 
 #SHITPOSTKOMENDY
-@bot.command(name='reality')
+@tree.command(
+    name="reality",
+    description="...",
+)
 async def reality(ctx):
-    await ctx.send("Can you really enjoy reality anymore?")
+    await ctx.respond("Can you really enjoy reality anymore?")
 
-@bot.command(name='sprytek')
-async def sprytek(ctx):
+@tree.command(
+    name="sprytek",
+    description="Sends you a random picture of Sprytek!",
+)
+async def sprytek(interaction: discord.Interaction):
     cat_image = get_random_cat_image()
     
     if cat_image:
         with open(cat_image, 'rb') as file:
-            await ctx.send(file=discord.File(file))
+            await interaction.response.send_message(file=discord.File(file))
     else:
-        await ctx.send("Nie znaleziono żadnych zdjęć kota.")
-
+        await interaction.response.send_message("Nie znaleziono żadnych zdjęć kota.")
 
 
 
 
 # Uruchom bota
-bot.run('')
+client.run('')
