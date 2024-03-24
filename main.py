@@ -159,33 +159,33 @@ async def on_message(message):
     name="points",
     description="Shows you how many points you have!",
 )
-async def points(ctx):
-    await ctx.respond(f"User {ctx.author.mention} has {point_system.get_points(str(ctx.author.id))} points!")
+async def points(interaction: discord.Interaction):
+    await interaction.response.send_message(f"User {interaction.user.mention} has {point_system.get_points(str(interaction.user.id))} points!")
 
 
 @tree.command(
     name="add",
     description="Adding points, accesible only by the admins!",
 )
-async def add(ctx, member: discord.Member, p: int):
-    role = discord.utils.find(lambda r: r.name == 'Matt', ctx.guild.roles) 
-    if role in ctx.author.roles:
+async def add(interaction: discord.Interaction, member: discord.Member, p: int):
+    role = discord.utils.find(lambda r: r.name == 'Matt', interaction.guild.roles) 
+    if role in interaction.user.roles:
         point_system.add_points(str(member.id), p)
-        await ctx.respond(f"Added {p} points to {member.display_name}!")
+        await interaction.response.send_message(f"Added {p} points to {member.display_name}!")
     else:
-        await ctx.respond("NIE DLA PSA!")
+        await interaction.response.send_message("NIE DLA PSA!")
 
 @tree.command(
     name="sub",
     description="Substract points.",
 )
-async def sub(ctx, member: discord.Member, p: int):
-    role = discord.utils.find(lambda r: r.name == 'Matt', ctx.guild.roles) 
-    if role in ctx.author.roles:
+async def sub(interaction: discord.Interaction, member: discord.Member, p: int):
+    role = discord.utils.find(lambda r: r.name == 'Matt', interaction.guild.roles) 
+    if role in interaction.user.roles:
         point_system.sub_points(str(member.id), p)
-        await ctx.respond(f"Subtracted {p} points from {member.display_name}!")
+        await interaction.response.send_message(f"Subtracted {p} points from {member.display_name}!")
     else:
-        await ctx.respond("You do not have permissions to use this command!")
+        await interaction.response.send_message("You do not have permissions to use this command!")
 
 
 #SHITPOSTKOMENDY
@@ -193,8 +193,8 @@ async def sub(ctx, member: discord.Member, p: int):
     name="reality",
     description="...",
 )
-async def reality(ctx):
-    await ctx.respond("Can you really enjoy reality anymore?")
+async def reality(interaction: discord.Interaction):
+    await interaction.response.send_message("Can you really enjoy reality anymore?")
 
 @tree.command(
     name="sprytek",
