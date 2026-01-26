@@ -139,12 +139,34 @@ def setup_commands(client, config, point_system, achievement_system, playlist_ma
     @client.tree.command(name="sprytekinfo", description="Informacje o Sprytku")
     async def sprytekinfo_command(interaction: discord.Interaction):
         embed = discord.Embed(
-            title="Sprytek",
-            description="Tu wpisz informacje o Sprytku!",
-            color=0xFFA500
+            title="Sprytek (2012-2026)",
+            description="Ukochany kot Matta Krupy, wierny towarzysz i pomoc emocjonalna.",
+            color=0x808080
         )
-        # TODO: Dodaj własne pola z informacjami o Sprytku
-        # embed.add_field(name="...", value="...", inline=False)
+        embed.add_field(
+            name="Daty",
+            value="26.03.2012 - 23.01.2026",
+            inline=True
+        )
+        embed.add_field(
+            name="Wygląd",
+            value="Biało-szaro-czarny, krótkowłosy",
+            inline=True
+        )
+        embed.add_field(
+            name="Pochodzenie",
+            value="Mama z Chorwacji, ojciec nieznany",
+            inline=False
+        )
+        embed.add_field(
+            name="Osobowość",
+            value="Sprytek był wspaniałym kotem i wiernym przyjacielem. "
+                  "Służył jako pomoc emocjonalna dla Matta i wielu innych osób. "
+                  "Uwielbiał przytulaski, grzanie innych swoim ciepłem "
+                  "i uspokajające mruczenie dla tych, którzy tego potrzebowali.",
+            inline=False
+        )
+        embed.set_footer(text="Na zawsze w naszych sercach")
         await interaction.response.send_message(embed=embed)
 
     @client.tree.command(name="achievements", description="Pokazuje Twoje zdobyte achievementy")
