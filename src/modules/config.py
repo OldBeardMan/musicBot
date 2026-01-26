@@ -10,6 +10,7 @@ CONFIG = {
     'USERS_DATA_FILE': os.getenv('USERS_DATA_FILE', 'users_data.json'),
     'SPAM_COOLDOWN': int(os.getenv('SPAM_COOLDOWN', '3')),
     'MUSIC_BREAK': int(os.getenv('MUSIC_BREAK', '5')),
+    'ALLOWED_GUILDS': [int(x) for x in os.getenv('ALLOWED_GUILDS', '').split(',') if x],
 }
 
 DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')

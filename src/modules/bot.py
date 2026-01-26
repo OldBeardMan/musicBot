@@ -10,6 +10,7 @@ from .config import CONFIG
 from .playlist import PlaylistManager
 from .points import PointSystem
 from .commands import setup_commands
+from .achievements import AchievementSystem
 
 logger = logging.getLogger(__name__)
 
@@ -27,21 +28,11 @@ class MusicBot(discord.Client):
         self.synced = False
         self.playlist_manager = PlaylistManager(CONFIG['MUSIC_FOLDER'])
         self.point_system = PointSystem(CONFIG['USERS_DATA_FILE'])
+        self.achievement_system = AchievementSystem(self.point_system)
         self.last_message_times = {}
-        
-        # Poziomy i nagrody
-        self.levels = [
-            (10, "printer"),
-            (100, "Autumn Wanderer"),
-            (500, "Do-Not-Listener"),
-            (2500, "Winter Gifter"),
-            (10000, "Nordic Mountaineer"),
-            (100000, "Icelandic Fugitive"),
-            (1000000, "The Matt Devotee")
-        ]
-        
+
         # Konfiguracja komend
-        setup_commands(self, self.config, self.point_system)
+        setup_commands(self, self.config, self.point_system, self.achievement_system, self.playlist_manager)
     
     async def setup_hook(self):
         """Synchronizuje komendy przy starcie."""
@@ -54,16 +45,38 @@ class MusicBot(discord.Client):
     async def on_ready(self):
         """Wywoływane gdy bot jest gotowy."""
         logger.info(f'Zalogowano jako {self.user}')
-        
+
+        # Sprawdzenie whitelisty serwerów
+        await self._check_guild_whitelist()
+
         # Ustawienie statusu
-        await self.change_presence(activity=discord.Game(name='Matt Krupa'))
-        
+        await self.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name='Matt Krupa'))
+
         # Połączenie z kanałem głosowym
         await self._connect_to_voice_channel()
-        
+
         # Start odtwarzania muzyki
         if not self.background_music.is_running():
             self.background_music.start()
+
+    async def _check_guild_whitelist(self):
+        """Sprawdza i opuszcza serwery spoza whitelisty."""
+        allowed_guilds = self.config.get('ALLOWED_GUILDS', [])
+        if not allowed_guilds:
+            logger.info("Whitelist serwerów jest pusta - bot pozostaje na wszystkich serwerach")
+            return
+
+        for guild in self.guilds:
+            if guild.id not in allowed_guilds:
+                logger.warning(f"Opuszczam serwer spoza whitelisty: {guild.name} ({guild.id})")
+                await guild.leave()
+
+    async def on_guild_join(self, guild):
+        """Wywoływane gdy bot dołącza do nowego serwera."""
+        allowed_guilds = self.config.get('ALLOWED_GUILDS', [])
+        if allowed_guilds and guild.id not in allowed_guilds:
+            logger.warning(f"Odmowa dołączenia do serwera spoza whitelisty: {guild.name} ({guild.id})")
+            await guild.leave()
     
     async def _connect_to_voice_channel(self):
         """Łączy z określonym kanałem głosowym."""
@@ -90,30 +103,6 @@ class MusicBot(discord.Client):
             logger.error(f"Folder {self.config['CAT_IMAGES_FOLDER']} nie istnieje")
         return None
     
-    async def _check_level_up(self, user, channel, old_points, new_points):
-        """Sprawdza czy użytkownik awansował na wyższy poziom."""
-        for points_needed, role_name in self.levels:
-            if new_points >= points_needed and old_points < points_needed:
-                role = discord.utils.get(user.guild.roles, name=role_name)
-                if role:
-                    try:
-                        await user.add_roles(role)
-                        level_num = self.levels.index((points_needed, role_name)) + 1
-                        
-                        if points_needed == 1000000:  # Najwyższy poziom
-                            await channel.send(
-                                f"🎉 {user.mention} osiągnął najwyższy poziom! "
-                                f"Rola: {role_name}! Właśnie wysłał swoją milionową wiadomość! 🎉"
-                            )
-                        else:
-                            await channel.send(
-                                f"🎊 {user.mention} osiągnął poziom {level_num}! "
-                                f"Nowa rola: {role_name}!"
-                            )
-                    except discord.Forbidden:
-                        logger.error(f"Brak uprawnień do nadania roli {role_name}")
-                break
-    
     async def on_message(self, message):
         """Obsługa wiadomości."""
         if message.author.bot:
@@ -133,10 +122,7 @@ class MusicBot(discord.Client):
                 return
         
         self.last_message_times[user_id] = current_time
-        
-        # Zapisz stare punkty dla sprawdzenia poziomu
-        old_points = self.point_system.get_points(user_id)
-        
+
         # Dodawanie punktów
         points_to_add = 1
         if message.channel.name == 'memes':
@@ -144,40 +130,55 @@ class MusicBot(discord.Client):
             image_extensions = ('png', 'jpg', 'jpeg', 'gif')
             if any(att.filename.lower().endswith(image_extensions) for att in message.attachments):
                 points_to_add = 5
-        
+                # Ustaw flagę first_meme jeśli jeszcze nie ustawiona
+                if not self.achievement_system.get_flag(user_id, 'first_meme'):
+                    self.achievement_system.set_flag(user_id, 'first_meme', True)
+
         self.point_system.add_points(user_id, points_to_add)
-        new_points = self.point_system.get_points(user_id)
+
+        # Sprawdź achievementy
+        new_achievements = self.achievement_system.check_and_award_achievements(user_id)
+        if new_achievements:
+            from .achievements import ACHIEVEMENTS
+            achievement_names = [ACHIEVEMENTS[a]['emoji'] + ' ' + ACHIEVEMENTS[a]['name'] for a in new_achievements]
+            try:
+                await message.channel.send(
+                    f"🎉 {message.author.mention} zdobył(a) achievement: {', '.join(achievement_names)}!"
+                )
+            except discord.Forbidden:
+                pass
         
-        # Sprawdź awans
-        await self._check_level_up(message.author, message.channel, old_points, new_points)
-        
-        # Odpowiedzi na słowa kluczowe
-        keyword_responses = {
-            "kuna": "kuna",
-            "matt": "Jeśli chcesz wiedzieć więcej o Matt, sprawdź: https://mattkrupa.net/",
-            "sprytek": "To ja!",
-            "sus": "amogus"
-        }
-        
-        content_lower = message.content.lower()
-        for keyword, response in keyword_responses.items():
-            if keyword in content_lower:
-                try:
-                    await message.reply(response)
-                except discord.Forbidden:
-                    pass
-                break
+        # Odpowiedź na słowo kluczowe "kuna"
+        if "kuna" in message.content.lower():
+            try:
+                await message.reply("kuna")
+            except discord.Forbidden:
+                pass
     
     @tasks.loop(seconds=CONFIG['MUSIC_BREAK'])
     async def background_music(self):
         """Odtwarza muzykę w tle."""
+        # Sprawdź czy jest połączenie, jeśli nie - połącz ponownie
         if not self.voice_clients:
+            logger.warning("Brak połączenia głosowego, próba ponownego połączenia...")
+            await self._connect_to_voice_channel()
             return
-        
+
         voice_client = self.voice_clients[0]
+
+        # Sprawdź czy połączenie jest aktywne
+        if not voice_client.is_connected():
+            logger.warning("Połączenie głosowe nieaktywne, rozłączam i łączę ponownie...")
+            try:
+                await voice_client.disconnect(force=True)
+            except:
+                pass
+            await self._connect_to_voice_channel()
+            return
+
         if voice_client.is_playing():
             return
-        
+
         song = self.playlist_manager.get_next_song()
         if song and os.path.isfile(song):
             try:

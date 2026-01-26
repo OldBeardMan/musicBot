@@ -8,6 +8,7 @@ class PlaylistManager:
     def __init__(self, folder_path: str):
         self.folder_path = folder_path
         self.playlist = self._create_playlist()
+        self.current_song: Optional[str] = None
     
     def _create_playlist(self):
         """Tworzy playlistę z plików w folderze."""
@@ -28,7 +29,18 @@ class PlaylistManager:
         if self.playlist:
             song = self.playlist.pop(0)
             self.playlist.append(song)
+            self.current_song = song
             return song
+        return None
+
+    def get_current_song(self) -> Optional[str]:
+        """Zwraca pełną ścieżkę aktualnie odtwarzanego utworu."""
+        return self.current_song
+
+    def get_current_song_name(self) -> Optional[str]:
+        """Zwraca nazwę aktualnie odtwarzanego utworu (bez ścieżki)."""
+        if self.current_song:
+            return os.path.basename(self.current_song)
         return None
     
     def refresh_playlist(self):
@@ -38,9 +50,3 @@ class PlaylistManager:
     def get_playlist_length(self) -> int:
         """Zwraca liczbę utworów w playliście."""
         return len(self.playlist)
-    
-    def get_current_song_name(self) -> Optional[str]:
-        """Zwraca nazwę aktualnego utworu (pierwszy w kolejce)."""
-        if self.playlist:
-            return os.path.basename(self.playlist[0])
-        return None
