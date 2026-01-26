@@ -50,3 +50,11 @@ class PlaylistManager:
     def get_playlist_length(self) -> int:
         """Zwraca liczbę utworów w playliście."""
         return len(self.playlist)
+
+    def get_upcoming_songs(self, count: int = 5) -> list:
+        """Zwraca listę następnych utworów w kolejce (bez aktualnie granego)."""
+        upcoming = []
+        for i, song in enumerate(self.playlist[:count]):
+            song_name = os.path.splitext(os.path.basename(song))[0]
+            upcoming.append(song_name)
+        return upcoming

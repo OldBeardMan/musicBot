@@ -45,6 +45,19 @@ class MusicBot(discord.Client):
 
         # Synchronizacja komend per-guild (natychmiastowa)
         if not self.synced:
+            # Zapisz komendy z drzewa
+            commands = self.tree.get_commands()
+
+            # Wyczyść globalne komendy z Discord API
+            self.tree.clear_commands(guild=None)
+            await self.tree.sync()
+            logger.info("Wyczyszczono globalne komendy z Discord")
+
+            # Przywróć komendy do drzewa
+            for cmd in commands:
+                self.tree.add_command(cmd)
+
+            # Zsynchronizuj per-guild
             for guild in self.guilds:
                 try:
                     self.tree.copy_global_to(guild=guild)

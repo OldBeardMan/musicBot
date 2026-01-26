@@ -218,3 +218,38 @@ def setup_commands(client, config, point_system, achievement_system, playlist_ma
             await interaction.response.send_message(embed=embed)
         else:
             await interaction.response.send_message("🔇 Aktualnie nic nie jest odtwarzane.", ephemeral=True)
+
+    @client.tree.command(name="queue", description="Pokazuje kolejkę następnych utworów")
+    async def queue_command(interaction: discord.Interaction):
+        current_song = playlist_manager.get_current_song_name()
+        upcoming = playlist_manager.get_upcoming_songs(5)
+
+        embed = discord.Embed(
+            title="📋 Kolejka",
+            color=0x1DB954
+        )
+
+        if current_song:
+            song_name = os.path.splitext(current_song)[0]
+            embed.add_field(name="Teraz gra", value=f"🎵 {song_name}", inline=False)
+
+        if upcoming:
+            queue_text = "\n".join([f"{i+1}. {song}" for i, song in enumerate(upcoming)])
+            embed.add_field(name="Następne", value=queue_text, inline=False)
+
+        embed.set_footer(text=f"Utworów w kolejce: {playlist_manager.get_playlist_length()}")
+        await interaction.response.send_message(embed=embed)
+
+    @client.tree.command(name="skip", description="Przeskakuje do następnego utworu")
+    async def skip_command(interaction: discord.Interaction):
+        if not client.voice_clients:
+            await interaction.response.send_message("❌ Bot nie jest połączony z kanałem głosowym.", ephemeral=True)
+            return
+
+        voice_client = client.voice_clients[0]
+
+        if voice_client.is_playing():
+            voice_client.stop()
+            await interaction.response.send_message("⏭️ Przeskoczono do następnego utworu.")
+        else:
+            await interaction.response.send_message("❌ Aktualnie nic nie jest odtwarzane.", ephemeral=True)
