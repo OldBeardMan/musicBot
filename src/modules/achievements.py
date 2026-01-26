@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 ACHIEVEMENTS = {
     'first_message': {
-        'name': 'Pierwsza wiadomość',
+        'name': 'Początek',
         'description': 'Wysłanie pierwszej wiadomości',
         'emoji': '📝'
     },
@@ -18,29 +18,39 @@ ACHIEVEMENTS = {
         'emoji': '💯'
     },
     'points_1000': {
-        'name': 'Tysiącznik',
+        'name': 'Tysiąc',
         'description': 'Zdobycie 1000 punktów',
         'emoji': '🏅'
     },
     'points_10000': {
-        'name': 'Legenda',
+        'name': 'Dziesięć tysięcy',
         'description': 'Zdobycie 10000 punktów',
         'emoji': '🏆'
     },
     'first_meme': {
-        'name': 'Meme Lord',
-        'description': 'Pierwszy obrazek na #memes',
-        'emoji': '🎭'
+        'name': 'Obrazek',
+        'description': 'Wysłanie obrazka na #memes',
+        'emoji': '🖼️'
     },
     'used_sprytek': {
-        'name': 'Fan Sprytka',
+        'name': 'Sprytek lover',
         'description': 'Użycie komendy /sprytek',
         'emoji': '🐱'
     },
     'used_currentsong': {
-        'name': 'Meloman',
+        'name': 'Słuchacz',
         'description': 'Użycie komendy /currentsong',
         'emoji': '🎵'
+    },
+    'kuna': {
+        'name': 'Kuna',
+        'description': 'Napisanie "kuna"',
+        'emoji': '🦝'
+    },
+    'jp2': {
+        'name': '2137',
+        'description': 'Wysłanie wiadomości o 21:37',
+        'emoji': '🕘'
     }
 }
 
@@ -79,6 +89,12 @@ class AchievementSystem:
 
         if user.flags.get('used_currentsong') and 'used_currentsong' not in user.achievements:
             new_achievements.append('used_currentsong')
+
+        if user.flags.get('kuna') and 'kuna' not in user.achievements:
+            new_achievements.append('kuna')
+
+        if user.flags.get('jp2') and 'jp2' not in user.achievements:
+            new_achievements.append('jp2')
 
         # Dodaj nowe achievementy
         for achievement_id in new_achievements:

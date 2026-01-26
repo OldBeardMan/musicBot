@@ -61,10 +61,6 @@ def setup_commands(client, config, point_system, achievement_system, playlist_ma
         point_system.sub_points(str(member.id), points)
         await interaction.response.send_message(f"✅ Odjęto **{points}** punktów od {member.display_name}!")
 
-    @client.tree.command(name="reality", description="...")
-    async def reality_command(interaction: discord.Interaction):
-        await interaction.response.send_message("🤔 Czy naprawdę możesz jeszcze cieszyć się rzeczywistością?")
-
     @client.tree.command(name="sprytek", description="Wysyła losowe zdjęcie Sprytka!")
     async def sprytek_command(interaction: discord.Interaction):
         await interaction.response.defer()
@@ -82,7 +78,7 @@ def setup_commands(client, config, point_system, achievement_system, playlist_ma
             try:
                 with open(cat_image, 'rb') as file:
                     discord_file = discord.File(file, filename=os.path.basename(cat_image))
-                    await interaction.followup.send("🐱 Oto Sprytek!", file=discord_file)
+                    await interaction.followup.send("To ja: ", file=discord_file)
             except Exception as e:
                 logger.error(f"Błąd wysyłania zdjęcia: {e}")
                 await interaction.followup.send("❌ Wystąpił błąd przy wysyłaniu zdjęcia.", ephemeral=True)

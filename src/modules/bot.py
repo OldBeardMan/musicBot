@@ -4,6 +4,7 @@ import asyncio
 import os
 import logging
 import random
+from datetime import timezone, timedelta
 from typing import Optional
 
 from .config import CONFIG
@@ -35,16 +36,23 @@ class MusicBot(discord.Client):
         setup_commands(self, self.config, self.point_system, self.achievement_system, self.playlist_manager)
     
     async def setup_hook(self):
-        """Synchronizuje komendy przy starcie."""
-        try:
-            synced = await self.tree.sync()
-            logger.info(f"Zsynchronizowano {len(synced)} komend")
-        except Exception as e:
-            logger.error(f"Błąd synchronizacji komend: {e}")
+        """Hook wywoływany przed połączeniem - synchronizacja przeniesiona do on_ready."""
+        pass
     
     async def on_ready(self):
         """Wywoływane gdy bot jest gotowy."""
         logger.info(f'Zalogowano jako {self.user}')
+
+        # Synchronizacja komend per-guild (natychmiastowa)
+        if not self.synced:
+            for guild in self.guilds:
+                try:
+                    self.tree.copy_global_to(guild=guild)
+                    synced = await self.tree.sync(guild=guild)
+                    logger.info(f"Zsynchronizowano {len(synced)} komend na serwerze {guild.name}")
+                except Exception as e:
+                    logger.error(f"Błąd synchronizacji komend na {guild.name}: {e}")
+            self.synced = True
 
         # Sprawdzenie whitelisty serwerów
         await self._check_guild_whitelist()
@@ -77,6 +85,15 @@ class MusicBot(discord.Client):
         if allowed_guilds and guild.id not in allowed_guilds:
             logger.warning(f"Odmowa dołączenia do serwera spoza whitelisty: {guild.name} ({guild.id})")
             await guild.leave()
+            return
+
+        # Synchronizacja komend na nowym serwerze
+        try:
+            self.tree.copy_global_to(guild=guild)
+            synced = await self.tree.sync(guild=guild)
+            logger.info(f"Zsynchronizowano {len(synced)} komend na nowym serwerze {guild.name}")
+        except Exception as e:
+            logger.error(f"Błąd synchronizacji komend na {guild.name}: {e}")
     
     async def _connect_to_voice_channel(self):
         """Łączy z określonym kanałem głosowym."""
@@ -136,6 +153,18 @@ class MusicBot(discord.Client):
 
         self.point_system.add_points(user_id, points_to_add)
 
+        # Achievement za napisanie "kuna"
+        if "kuna" in message.content.lower():
+            if not self.achievement_system.get_flag(user_id, 'kuna'):
+                self.achievement_system.set_flag(user_id, 'kuna', True)
+
+        # Achievement za wiadomość o 21:37 (czas polski)
+        poland_tz = timezone(timedelta(hours=1))  # CET (zimą +1, latem +2)
+        msg_time = message.created_at.astimezone(poland_tz)
+        if msg_time.hour == 21 and msg_time.minute == 37:
+            if not self.achievement_system.get_flag(user_id, 'jp2'):
+                self.achievement_system.set_flag(user_id, 'jp2', True)
+
         # Sprawdź achievementy
         new_achievements = self.achievement_system.check_and_award_achievements(user_id)
         if new_achievements:
@@ -143,11 +172,11 @@ class MusicBot(discord.Client):
             achievement_names = [ACHIEVEMENTS[a]['emoji'] + ' ' + ACHIEVEMENTS[a]['name'] for a in new_achievements]
             try:
                 await message.channel.send(
-                    f"🎉 {message.author.mention} zdobył(a) achievement: {', '.join(achievement_names)}!"
+                    f"{message.author.mention} zdobywa: {', '.join(achievement_names)}"
                 )
             except discord.Forbidden:
                 pass
-        
+
         # Odpowiedź na słowo kluczowe "kuna"
         if "kuna" in message.content.lower():
             try:
