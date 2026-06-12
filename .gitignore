@@ -43,6 +43,3 @@ ENV/
 # OS
 .DS_Store
 Thumbs.db
-
-# Bot specific
-users_data_backup.json

@@ -1,28 +1,28 @@
 import sys
 import os
 
-# Dodaj katalog src do ścieżki Python
+# Add the src directory to the Python path
 sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
 
 import logging
 from modules.config import DISCORD_TOKEN
-from modules.bot import MusicBot
+from modules.bot import SprytekBot
 
-# Konfiguracja logowania
+# Logging configuration
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Inicjalizacja bota
-client = MusicBot()
+# Initialize the bot
+client = SprytekBot()
 
-# Uruchomienie bota
+# Run the bot
 if __name__ == "__main__":
     if not DISCORD_TOKEN:
-        logger.error("Brak tokenu bota! Ustaw DISCORD_TOKEN w pliku .env")
+        logger.error("Missing bot token! Set DISCORD_TOKEN in the .env file")
         exit(1)
     else:
         try:
             client.run(DISCORD_TOKEN)
         except Exception as e:
-            logger.error(f"Błąd uruchamiania bota: {e}")
+            logger.error(f"Error starting the bot: {e}")
             exit(1)

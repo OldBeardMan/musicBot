@@ -1,1 +1,1 @@
-# Music Bot Package
+# Sprytek Bot Package
