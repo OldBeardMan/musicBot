@@ -43,3 +43,6 @@ ENV/
 # OS
 .DS_Store
 Thumbs.db
+# Bot data
+*.sqlite
+*.sqlite-*

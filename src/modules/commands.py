@@ -21,8 +21,63 @@ def _get_random_cat_image(config) -> Optional[str]:
     return None
 
 
-def setup_commands(client, config):
+PET_COOLDOWN = 10  # seconds between pets from one person
+PET_MILESTONE = 100
+
+PURRS = [
+    "Sprytek purrs softly.",
+    "Sprytek leans into your hand.",
+    "Sprytek closes his eyes, very slowly.",
+    "Sprytek stretches and purrs a little louder.",
+    "Sprytek rolls onto his side.",
+    "Sprytek gives you a slow blink.",
+    "Sprytek's purring fills the room.",
+    "Sprytek curls up next to you, warm.",
+]
+
+
+def setup_commands(client, config, store):
     """Configures the bot's slash commands."""
+
+    @client.tree.command(name="pet", description="Pet Sprytek. Everyone's pets add up.")
+    async def pet_command(interaction: discord.Interaction):
+        result = store.pet(interaction.user.id, PET_COOLDOWN)
+        if result is None:
+            await interaction.response.send_message("Sprytek is still purring from the last one. Give him a moment.", ephemeral=True)
+            return
+        mine, total = result
+
+        if total % PET_MILESTONE == 0:
+            await interaction.response.defer()
+            text = (f"✨ {interaction.user.mention} gave Sprytek pet number **{total:,}**! "
+                    f"He purrs for everyone who ever petted him.")
+            cat_image = _get_random_cat_image(config)
+            if cat_image:
+                with open(cat_image, 'rb') as file:
+                    await interaction.followup.send(text, file=discord.File(file, filename=os.path.basename(cat_image)))
+            else:
+                await interaction.followup.send(text)
+            return
+
+        await interaction.response.send_message(
+            f"{random.choice(PURRS)} *({mine:,} from you · {total:,} from everyone)*"
+        )
+
+    @client.tree.command(name="pets", description="Who has petted Sprytek the most")
+    async def pets_command(interaction: discord.Interaction):
+        top = store.top_petters(10)
+        embed = discord.Embed(title="Sprytek's favourite people", color=0x808080)
+        if not top:
+            embed.description = "Nobody has petted Sprytek yet. Try `/pet`."
+        else:
+            lines = []
+            for i, (user_id, count) in enumerate(top, 1):
+                member = interaction.guild.get_member(int(user_id)) if interaction.guild else None
+                name = member.display_name if member else f"<@{user_id}>"
+                lines.append(f"**{i}.** {name}: {count:,}")
+            embed.description = "\n".join(lines)
+        embed.set_footer(text=f"{store.total_pets():,} pets from everyone")
+        await interaction.response.send_message(embed=embed, allowed_mentions=discord.AllowedMentions.none())
 
     @client.tree.command(name="sprytek", description="Sends a random picture of Sprytek!")
     async def sprytek_command(interaction: discord.Interaction):

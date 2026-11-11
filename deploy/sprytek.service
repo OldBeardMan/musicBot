@@ -1,0 +1,34 @@
+[Unit]
+Description=Sprytek - Discord bot (Matt Krupa, Long Kitten Nation)
+After=network-online.target lkn-web.service banan-egress.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=sprytek
+Group=sprytek
+WorkingDirectory=/opt/sprytek
+EnvironmentFile=/etc/sprytek/bot.env
+Environment=PYTHONUNBUFFERED=1
+Environment=CAT_IMAGES_FOLDER=/opt/sprytek/cat_images
+Environment=DATA_DB=/var/lib/sprytek/sprytek.sqlite
+ExecStart=/opt/sprytek/venv/bin/python main.py
+Restart=always
+RestartSec=10
+StateDirectory=sprytek
+StateDirectoryMode=0750
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+InaccessiblePaths=-/opt/minecraft -/opt/hyit -/opt/renamp -/opt/sites-monitor -/opt/ultimatecontractors -/opt/lldap -/opt/lkn-web -/var/lib/lkn-web -/var/backups -/srv -/etc/letsencrypt -/etc/lkn
+MemoryMax=256M
+
+[Install]
+WantedBy=multi-user.target
