@@ -23,6 +23,15 @@ CONFIG = {
     # channel for "welcome to Long Kitten Nation"
     'LKN_CHANNEL_ID': _int('LKN_CHANNEL_ID'),
     'LKN_SYNC_SECONDS': _int('LKN_SYNC_SECONDS', 60),
+
+    # Seasons Clicker leaderboard (mattkrupa.net). Leave CLICKER_BOT_SECRET empty to switch this off.
+    'CLICKER_URL': os.getenv('CLICKER_URL', 'https://mattkrupa.net'),
+    'CLICKER_BOT_SECRET': os.getenv('CLICKER_BOT_SECRET', ''),
+    # the MATT KRUPA server (defaults to the Long Kitten Nation one, it is the same server)
+    'CLICKER_GUILD_ID': _int('CLICKER_GUILD_ID') or _int('LKN_GUILD_ID'),
+    # #sc-scores: new records and roles
+    'CLICKER_CHANNEL_ID': _int('CLICKER_CHANNEL_ID'),
+    'CLICKER_SYNC_SECONDS': _int('CLICKER_SYNC_SECONDS', 120),
 }
 
 DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
